@@ -14,7 +14,7 @@ func TestPublishedTweetsIsSaved(t *testing.T) {
 	text := "This is my first tweet"
 	tweet = domain.NewTweet(user, text)
 
-	service.PublishTweet(tweet)
+	_ = service.PublishTweet(tweet)
 
 	assert.Equal(t, tweet, service.GetTweet(), "Expected tweet is")
 
@@ -29,11 +29,69 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	tweet = domain.NewTweet(user, text)
 
 	// Operation
-	service.PublishTweet(tweet)
+	_ = service.PublishTweet(tweet)
 
 	// Validation
 	publishedTweet := service.GetTweet()
 	assert.Equal(t, text, publishedTweet.Text, "Expected tweetMsg is \"%s\" \nbut is \"%s\"", text, publishedTweet.Text)
 	assert.Equal(t, user, publishedTweet.User, "Expected user is \"%s\" \nbut is \"%s\"", user, publishedTweet.User)
 	assert.NotNil(t, publishedTweet.Date, "Expected date can't be nil")
+}
+
+func TestTweetWithoutUserIsNotPublished(t *testing.T) {
+
+	// Initialization
+	var tweet *domain.Tweet
+
+	var user string
+	text := "This is my first tweet"
+
+	tweet = domain.NewTweet(user, text)
+
+	// Operation
+	var err error
+	err = service.PublishTweet(tweet)
+
+	// Validation
+	assert.Error(t, err)
+	assert.Equal(t, "username is required", err.Error(), "Expected error is 'username is required'")
+}
+
+func TestTweetWithoutTextIsNotPublished(t *testing.T) {
+
+	// Initialization
+	var tweet *domain.Tweet
+
+	user := "npascual"
+	var text string
+
+	tweet = domain.NewTweet(user, text)
+
+	// Operation
+	var err error
+	err = service.PublishTweet(tweet)
+
+	// Validation
+	assert.Error(t, err)
+	assert.Equal(t, "text is required", err.Error(), "Expected error is 'text is required'")
+}
+
+func TestTweetWhichExceeding140CharactersIsNotPublished(t *testing.T) {
+
+	// Initialization
+	var tweet *domain.Tweet
+
+	user := "npascual"
+	text := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+	tweet = domain.NewTweet(user, text)
+
+	// Operation
+	var err error
+	err = service.PublishTweet(tweet)
+
+	// Validation
+	assert.Error(t, err)
+	assert.Equal(t, "text limit is 140 characters", err.Error(), "Expected error is 'text limit is 140 characters'")
 }

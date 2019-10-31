@@ -27,9 +27,13 @@ func main() {
 
 			tweet := domain.NewTweet(user, tweetMsg)
 
-			service.PublishTweet(tweet)
+			err := service.PublishTweet(tweet)
 
-			c.Print("Tweet sent\n")
+			if err == nil {
+				c.Print("Tweet sent\n")
+			} else {
+				c.Print("Error!\n" + err.Error() + "\n")
+			}
 
 			return
 		},
