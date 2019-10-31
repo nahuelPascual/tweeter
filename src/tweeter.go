@@ -4,7 +4,6 @@ import (
 	"github.com/abiosoft/ishell"
 	"github.com/nahuelPascual/tweeter/src/domain"
 	"github.com/nahuelPascual/tweeter/src/service"
-	"time"
 )
 
 func main() {
@@ -26,10 +25,9 @@ func main() {
 			c.Print("Write your tweet: ")
 			tweetMsg := c.ReadLine()
 
-			now := time.Now()
-			tweet := domain.Tweet{user, tweetMsg, &now}
+			tweet := domain.NewTweet(user, tweetMsg)
 
-			service.PublishTweet(&tweet)
+			service.PublishTweet(tweet)
 
 			c.Print("Tweet sent\n")
 
