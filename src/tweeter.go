@@ -13,6 +13,8 @@ func main() {
 	shell.SetPrompt("Tweeter >> ")
 	shell.Print("Type 'help' to know commands\n")
 
+	tweetManager := service.NewTweetManager()
+
 	shell.AddCmd(&ishell.Cmd{
 		Name: "publishTweet",
 		Help: "Publishes a tweet",
@@ -28,7 +30,7 @@ func main() {
 
 			tweet := domain.NewTweet(user, tweetMsg)
 
-			_, err := service.PublishTweet(tweet)
+			_, err := tweetManager.PublishTweet(tweet)
 
 			if err == nil {
 				c.Print("Tweet sent\n")
@@ -47,7 +49,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := service.GetTweet()
+			tweet := tweetManager.GetTweet()
 
 			c.Println(*tweet)
 
@@ -62,7 +64,7 @@ func main() {
 			defer c.ShowPrompt(true)
 			id, _ := strconv.ParseInt(c.Args[0], 10, 64)
 
-			tweet, er := service.GetTweetById(id)
+			tweet, er := tweetManager.GetTweetById(id)
 
 			if er != nil {
 				c.Println(er)

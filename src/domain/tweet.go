@@ -19,3 +19,8 @@ func NewTweet(user, msg string) *Tweet {
 	seq_id += 1
 	return &Tweet{id, user, msg, &now}
 }
+
+func (twit Tweet) PrintableTweet() string {
+	printable := "@" + twit.User + ": " + twit.Text
+	return printable
+}

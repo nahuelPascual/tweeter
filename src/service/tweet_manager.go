@@ -6,10 +6,18 @@ import (
 	"strings"
 )
 
-var allTweets []*domain.Tweet
-var tweetsByUser = map[string][]*domain.Tweet{}
+type TweetManager struct {
+	allTweets    []*domain.Tweet
+	tweetsByUser map[string][]*domain.Tweet
+}
 
-func PublishTweet(tweety *domain.Tweet) (id int64, err error) {
+func NewTweetManager() (manager *TweetManager) {
+	manager = new(TweetManager)
+	manager.tweetsByUser = make(map[string][]*domain.Tweet)
+	return
+}
+
+func (manager *TweetManager) PublishTweet(tweety *domain.Tweet) (id int64, err error) {
 
 	length := len(strings.TrimSpace(tweety.Text))
 
@@ -20,29 +28,24 @@ func PublishTweet(tweety *domain.Tweet) (id int64, err error) {
 	} else if length > 140 {
 		err = fmt.Errorf("text limit is 140 characters")
 	} else {
-		addNewTweet(tweety)
+		manager.addNewTweet(tweety)
 	}
 
 	return tweety.Id, err
 }
 
-func GetTweet() *domain.Tweet {
-	return allTweets[len(allTweets)-1]
+func (manager *TweetManager) GetTweet() *domain.Tweet {
+	return manager.allTweets[len(manager.allTweets)-1]
 }
 
-func GetTweets() []*domain.Tweet {
-	return allTweets
+func (manager *TweetManager) GetTweets() []*domain.Tweet {
+	return manager.allTweets
 }
 
-func InitializeService() {
-	allTweets = make([]*domain.Tweet, 0)
-	tweetsByUser = make(map[string][]*domain.Tweet)
-}
-
-func GetTweetById(id int64) (aTweet *domain.Tweet, err error) {
-	for i := 0; i < len(allTweets); i++ {
-		if allTweets[i].Id == id {
-			aTweet = allTweets[i]
+func (manager *TweetManager) GetTweetById(id int64) (aTweet *domain.Tweet, err error) {
+	for i := 0; i < len(manager.allTweets); i++ {
+		if manager.allTweets[i].Id == id {
+			aTweet = manager.allTweets[i]
 			break
 		}
 	}
@@ -52,11 +55,16 @@ func GetTweetById(id int64) (aTweet *domain.Tweet, err error) {
 	return aTweet, err
 }
 
-func CountTweetsByUser(username string) int {
-	return len(tweetsByUser[username])
+func (manager *TweetManager) CountTweetsByUser(username string) int {
+	return len(manager.tweetsByUser[username])
 }
 
-func addNewTweet(tweet *domain.Tweet) {
+func (manager *TweetManager) GetTweetsByUser(username string) (tweets []*domain.Tweet) {
+	tweets = manager.tweetsByUser[username]
+	return
+}
+
+func (manager *TweetManager) addNewTweet(tweet *domain.Tweet) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -65,8 +73,8 @@ func addNewTweet(tweet *domain.Tweet) {
 	}()
 
 	/* Adding tweet to allTweets slice */
-	allTweets = append(allTweets, tweet)
+	manager.allTweets = append(manager.allTweets, tweet)
 
 	/* Adding tweet to map tweetsByUser */
-	tweetsByUser[tweet.User] = append(tweetsByUser[tweet.User], tweet)
+	manager.tweetsByUser[tweet.User] = append(manager.tweetsByUser[tweet.User], tweet)
 }
