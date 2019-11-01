@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-var tweets []*domain.Tweet
+var allTweets []*domain.Tweet
+var tweetsByUser = map[string][]*domain.Tweet{}
 
 func PublishTweet(tweety *domain.Tweet) (id int64, err error) {
 
@@ -19,33 +20,53 @@ func PublishTweet(tweety *domain.Tweet) (id int64, err error) {
 	} else if length > 140 {
 		err = fmt.Errorf("text limit is 140 characters")
 	} else {
-		tweets = append(tweets, tweety)
+		addNewTweet(tweety)
 	}
 
 	return tweety.Id, err
 }
 
 func GetTweet() *domain.Tweet {
-	return tweets[len(tweets)-1]
+	return allTweets[len(allTweets)-1]
 }
 
 func GetTweets() []*domain.Tweet {
-	return tweets
+	return allTweets
 }
 
 func InitializeService() {
-	tweets = make([]*domain.Tweet, 0)
+	allTweets = make([]*domain.Tweet, 0)
+	tweetsByUser = make(map[string][]*domain.Tweet)
 }
 
 func GetTweetById(id int64) (aTweet *domain.Tweet, err error) {
-	for i := 0; i < len(tweets); i++ {
-		if tweets[i].Id == id {
-			aTweet = tweets[i]
+	for i := 0; i < len(allTweets); i++ {
+		if allTweets[i].Id == id {
+			aTweet = allTweets[i]
 			break
 		}
 	}
 	if aTweet == nil {
-		err = fmt.Errorf("El Tweet con id #%d no existe", id)
+		err = fmt.Errorf("el Tweet con id #%d no existe", id)
 	}
 	return aTweet, err
+}
+
+func CountTweetsByUser(username string) int {
+	return len(tweetsByUser[username])
+}
+
+func addNewTweet(tweet *domain.Tweet) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			fmt.Print("Error!", r)
+		}
+	}()
+
+	/* Adding tweet to allTweets slice */
+	allTweets = append(allTweets, tweet)
+
+	/* Adding tweet to map tweetsByUser */
+	tweetsByUser[tweet.User] = append(tweetsByUser[tweet.User], tweet)
 }
