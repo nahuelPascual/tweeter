@@ -14,7 +14,7 @@ func TestPublishedTweetsIsSaved(t *testing.T) {
 	text := "This is my first tweet"
 	tweet = domain.NewTweet(user, text)
 
-	_ = service.PublishTweet(tweet)
+	_, _ = service.PublishTweet(tweet)
 
 	assert.Equal(t, tweet, service.GetTweet(), "Expected tweet is")
 
@@ -29,7 +29,7 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	tweet = domain.NewTweet(user, text)
 
 	// Operation
-	_ = service.PublishTweet(tweet)
+	_, _ = service.PublishTweet(tweet)
 
 	// Validation
 	publishedTweet := service.GetTweet()
@@ -50,7 +50,7 @@ func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	assert.Error(t, err)
@@ -69,7 +69,7 @@ func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	assert.Error(t, err)
@@ -89,9 +89,61 @@ func TestTweetWhichExceeding140CharactersIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	assert.Error(t, err)
 	assert.Equal(t, "text limit is 140 characters", err.Error(), "Expected error is 'text limit is 140 characters'")
+}
+
+func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
+
+	// Initialization
+	service.InitializeService()
+	var tweet, secondTweet *domain.Tweet
+	tweet = domain.NewTweet("npascual", "First tweet")
+	secondTweet = domain.NewTweet("npascual", "Second tweet")
+
+	// Operation
+	_, _ = service.PublishTweet(tweet)
+	_, _ = service.PublishTweet(secondTweet)
+
+	// Validation
+	publishedTweets := service.GetTweets()
+	assert.Equal(t, 2, len(publishedTweets), "Expected size is 2 but was %d", len(publishedTweets))
+}
+
+func TestCanRetrieveTweetById(t *testing.T) {
+
+	// Initialization
+	service.InitializeService()
+
+	var tweet *domain.Tweet
+	var id int64
+
+	user := "grupoesfera"
+	text := "This is my first tweet"
+
+	tweet = domain.NewTweet(user, text)
+
+	// Operation
+	id, _ = service.PublishTweet(tweet)
+
+	// Validation
+	publishedTweet, _ := service.GetTweetById(id)
+
+	assert.Equal(t, id, publishedTweet.Id, "Expected id #%d", id)
+}
+
+func TestCannotRetrieveTweetByInexistentId(t *testing.T) {
+
+	// Initialization
+	service.InitializeService()
+
+	var id int64 = 9777797979
+
+	// Validation
+	_, err := service.GetTweetById(id)
+
+	assert.Error(t, err, "Expected id #%d", id)
 }

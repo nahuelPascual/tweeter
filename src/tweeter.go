@@ -4,6 +4,7 @@ import (
 	"github.com/abiosoft/ishell"
 	"github.com/nahuelPascual/tweeter/src/domain"
 	"github.com/nahuelPascual/tweeter/src/service"
+	"strconv"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 
 			tweet := domain.NewTweet(user, tweetMsg)
 
-			err := service.PublishTweet(tweet)
+			_, err := service.PublishTweet(tweet)
 
 			if err == nil {
 				c.Print("Tweet sent\n")
@@ -40,8 +41,8 @@ func main() {
 	})
 
 	shell.AddCmd(&ishell.Cmd{
-		Name: "showTweet",
-		Help: "Shows a tweet",
+		Name: "showLastTweet",
+		Help: "Shows the last tweet published",
 		Func: func(c *ishell.Context) {
 
 			defer c.ShowPrompt(true)
@@ -51,6 +52,23 @@ func main() {
 			c.Println(*tweet)
 
 			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweetById",
+		Help: "shows the tweet that matches with id provided",
+		Func: func(c *ishell.Context) {
+			defer c.ShowPrompt(true)
+			id, _ := strconv.ParseInt(c.Args[0], 10, 64)
+
+			tweet, er := service.GetTweetById(id)
+
+			if er != nil {
+				c.Println(er)
+			} else {
+				c.Print(tweet)
+			}
 		},
 	})
 

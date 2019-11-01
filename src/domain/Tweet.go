@@ -1,8 +1,13 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
+
+var seq_id int64 = 1
 
 type Tweet struct {
+	Id   int64
 	User string
 	Text string
 	Date *time.Time
@@ -10,5 +15,7 @@ type Tweet struct {
 
 func NewTweet(user, msg string) *Tweet {
 	now := time.Now()
-	return &Tweet{user, msg, &now}
+	id := seq_id
+	seq_id += 1
+	return &Tweet{id, user, msg, &now}
 }
